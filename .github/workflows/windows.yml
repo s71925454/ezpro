@@ -8,48 +8,26 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Windows info
+      - name: Windows information
         shell: powershell
         run: |
-          Write-Host "Windows:"
-          Get-ComputerInfo | Select-Object WindowsProductName, WindowsVersion, OsBuildNumber
+          Write-Host "===== WINDOWS ====="
+          Get-ComputerInfo |
+            Select-Object WindowsProductName, WindowsVersion, OsBuildNumber
 
           Write-Host ""
-          Write-Host "Public IP:"
-          Invoke-RestMethod "https://api.ipify.org"
+          Write-Host "===== PUBLIC IP ====="
+          $ip = Invoke-RestMethod "https://api.ipify.org"
+          Write-Host "Public IP: $ip"
 
-      - name: Create adminpanel
+      - name: Test PowerShell
         shell: powershell
         run: |
-          $password = "Adminhbr2026!"
-          $securePassword = ConvertTo-SecureString $password -AsPlainText -Force
-
-          $user = Get-LocalUser -Name "adminpanel" -ErrorAction SilentlyContinue
-
-          if ($null -eq $user) {
-              New-LocalUser `
-                -Name "adminpanel" `
-                -Password $securePassword `
-                -FullName "EZPRO Admin" `
-                -Description "EZPRO temporary user"
-          }
-          else {
-              Set-LocalUser `
-                -Name "adminpanel" `
-                -Password $securePassword
-          }
-
-          Add-LocalGroupMember `
-            -Group "Administrators" `
-            -Member "adminpanel" `
-            -ErrorAction SilentlyContinue
-
-          Write-Host "User created."
-          Write-Host "Username: adminpanel"
-          Write-Host "Password: Adminhbr2026!"
+          Write-Host "EZPRO Windows Runner is working."
+          Write-Host "Runner: $env:RUNNER_NAME"
 
       - name: Keep runner alive
         shell: powershell
         run: |
-          Write-Host "EZPRO runner is running..."
+          Write-Host "Runner active for 5 minutes..."
           Start-Sleep -Seconds 300
