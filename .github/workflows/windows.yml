@@ -26,7 +26,7 @@ jobs:
       - name: Create adminpanel user
         shell: powershell
         env:
-          ADMIN_PASSWORD: Adminhbr2026!
+          ADMIN_PASSWORD: Adminhbr7@Q2X9Lm!
         run: |
           $securePassword = ConvertTo-SecureString $env:ADMIN_PASSWORD -AsPlainText -Force
 
