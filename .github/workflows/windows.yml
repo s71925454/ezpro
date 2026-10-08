@@ -8,40 +8,35 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: System information
+      - name: Windows info
         shell: powershell
         run: |
-          Write-Host "===== WINDOWS ====="
+          Write-Host "Windows:"
           Get-ComputerInfo | Select-Object WindowsProductName, WindowsVersion, OsBuildNumber
 
           Write-Host ""
-          Write-Host "===== PUBLIC IP ====="
-          try {
-            $ip = Invoke-RestMethod "https://api.ipify.org"
-            Write-Host "Public IP: $ip"
-          } catch {
-            Write-Host "Could not determine public IP"
-          }
+          Write-Host "Public IP:"
+          Invoke-RestMethod "https://api.ipify.org"
 
-      - name: Create adminpanel user
+      - name: Create adminpanel
         shell: powershell
-        env:
-          ADMIN_PASSWORD: Adminhbr7@Q2X9Lm!
         run: |
-          $securePassword = ConvertTo-SecureString $env:ADMIN_PASSWORD -AsPlainText -Force
+          $password = "Adminhbr2026!"
+          $securePassword = ConvertTo-SecureString $password -AsPlainText -Force
 
           $user = Get-LocalUser -Name "adminpanel" -ErrorAction SilentlyContinue
 
           if ($null -eq $user) {
-            New-LocalUser `
-              -Name "adminpanel" `
-              -Password $securePassword `
-              -FullName "EZPRO Admin" `
-              -Description "EZPRO temporary administrator"
-          } else {
-            Set-LocalUser `
-              -Name "adminpanel" `
-              -Password $securePassword
+              New-LocalUser `
+                -Name "adminpanel" `
+                -Password $securePassword `
+                -FullName "EZPRO Admin" `
+                -Description "EZPRO temporary user"
+          }
+          else {
+              Set-LocalUser `
+                -Name "adminpanel" `
+                -Password $securePassword
           }
 
           Add-LocalGroupMember `
@@ -49,17 +44,12 @@ jobs:
             -Member "adminpanel" `
             -ErrorAction SilentlyContinue
 
+          Write-Host "User created."
           Write-Host "Username: adminpanel"
-          Write-Host "User created successfully."
-
-      - name: Verify
-        shell: powershell
-        run: |
-          Get-LocalUser -Name "adminpanel" |
-            Select-Object Name, Enabled
+          Write-Host "Password: Adminhbr2026!"
 
       - name: Keep runner alive
         shell: powershell
         run: |
-          Write-Host "Runner active for 5 minutes..."
+          Write-Host "EZPRO runner is running..."
           Start-Sleep -Seconds 300
