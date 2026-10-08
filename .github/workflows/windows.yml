@@ -1,1 +1,65 @@
+name: EZPRO Windows
 
+on:
+  workflow_dispatch:
+
+jobs:
+  windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: System information
+        shell: powershell
+        run: |
+          Write-Host "===== WINDOWS ====="
+          Get-ComputerInfo | Select-Object WindowsProductName, WindowsVersion, OsBuildNumber
+
+          Write-Host ""
+          Write-Host "===== PUBLIC IP ====="
+          try {
+            $ip = Invoke-RestMethod "https://api.ipify.org"
+            Write-Host "Public IP: $ip"
+          } catch {
+            Write-Host "Could not determine public IP"
+          }
+
+      - name: Create adminpanel user
+        shell: powershell
+        env:
+          ADMIN_PASSWORD: adminhbr
+        run: |
+          $securePassword = ConvertTo-SecureString $env:ADMIN_PASSWORD -AsPlainText -Force
+
+          $user = Get-LocalUser -Name "adminpanel" -ErrorAction SilentlyContinue
+
+          if ($null -eq $user) {
+            New-LocalUser `
+              -Name "adminpanel" `
+              -Password $securePassword `
+              -FullName "EZPRO Admin" `
+              -Description "EZPRO temporary administrator"
+          } else {
+            Set-LocalUser `
+              -Name "adminpanel" `
+              -Password $securePassword
+          }
+
+          Add-LocalGroupMember `
+            -Group "Administrators" `
+            -Member "adminpanel" `
+            -ErrorAction SilentlyContinue
+
+          Write-Host "Username: adminpanel"
+          Write-Host "User created successfully."
+
+      - name: Verify
+        shell: powershell
+        run: |
+          Get-LocalUser -Name "adminpanel" |
+            Select-Object Name, Enabled
+
+      - name: Keep runner alive
+        shell: powershell
+        run: |
+          Write-Host "Runner active for 5 minutes..."
+          Start-Sleep -Seconds 300
